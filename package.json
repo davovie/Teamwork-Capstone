@@ -1,0 +1,25 @@
+{
+  "name": "teamwork-backend",
+  "version": "1.0.0",
+  "description": "An internal social network for employees in an organization.",
+  "main": "server.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/davovie/Teamwork-Capstone.git"
+  },
+  "keywords": [
+    "Teamwork",
+    "social",
+    "app",
+    "network"
+  ],
+  "author": "Ozi Oviezibe David",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/davovie/Teamwork-Capstone/issues"
+  },
+  "homepage": "https://github.com/davovie/Teamwork-Capstone#readme"
+}
