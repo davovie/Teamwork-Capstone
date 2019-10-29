@@ -15,7 +15,10 @@ app.use(bodyParser.json());
 // admin can create an employee user account
 app.post('/auth/create-user', (req, res, next) => {
     res.status(201).json({
-        message: "User account successfully created!"
+        status: 'success',
+        data: {message: "User account successfully created!",
+                token: '',
+                userId: 8765}
     })
 });
 
