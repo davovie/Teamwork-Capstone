@@ -4,7 +4,8 @@
   "description": "An internal social network for employees in an organization.",
   "main": "server.js",
   "scripts": {
-    "test": "mocha"
+    "test": "nyc mocha",
+    "coverage": "nyc report --reporter=text-lcov | coveralls"
   },
   "repository": {
     "type": "git",
@@ -31,10 +32,12 @@
     "pg": "^7.12.1"
   },
   "devDependencies": {
+    "coveralls": "^3.0.7",
     "eslint": "^6.6.0",
     "eslint-config-airbnb-base": "^14.0.0",
     "eslint-plugin-import": "^2.18.2",
     "mocha": "^6.2.2",
+    "nyc": "^14.1.1",
     "supertest": "^4.0.2"
   }
 }
