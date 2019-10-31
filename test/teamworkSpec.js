@@ -12,7 +12,7 @@ describe('Teamwork App', () => {
   describe('GET /', () => {
     it('responds with json', (done) => {
       request(app)
-        .get('/')
+        .get('/api/v1/')
         .set('Accept', 'application/json')
         .expect('Content-Type', /json/)
         .end((err, res) => {
@@ -27,7 +27,7 @@ describe('Teamwork App', () => {
   describe('POST /auth/create-user', () => {
     it('returns status code 201', (done) => {
       request(app)
-        .post('/auth/create-user')
+        .post('/api/v1/auth/create-user')
         .end((err, res) => {
           expect(res.status).to.equal(201);
           done();
@@ -35,7 +35,7 @@ describe('Teamwork App', () => {
     });
     it('responds with json data containing status success', (done) => {
       request(app)
-        .post('/auth/create-user')
+        .post('/api/v1/auth/create-user')
         .send({
           firstName: 'string',
           lastName: 'string',
@@ -70,7 +70,7 @@ describe('Teamwork App', () => {
   describe('POST /auth/signin', () => {
     it('responds with status code 200', (done) => {
       request(app)
-        .post('/auth/signin')
+        .post('/api/v1/auth/signin')
         .end((err, res) => {
           if (err) return done(err);
           expect(res.status).to.equal(200);
@@ -79,7 +79,7 @@ describe('Teamwork App', () => {
     });
     it('returns json data containing status success', (done) => {
       request(app)
-        .post('/auth/signin')
+        .post('/api/v1/auth/signin')
         .send({
           email: 'string',
           password: 'string'
@@ -106,7 +106,7 @@ describe('Teamwork App', () => {
   describe('POST /gifs', () => {
     it('responds with status code 201 - Creates a gif', (done) => {
       request(app)
-        .post('/gifs')
+        .post('/api/v1/gifs')
         .end((err, res) => {
           if (err) return done(err);
           expect(res.status).to.equal(201);
@@ -129,7 +129,7 @@ describe('Teamwork App', () => {
     // });
     it('returns json object with status success', (done) => {
       request(app)
-        .post('/gifs')
+        .post('/api/v1/gifs')
         .set('header', 'application/json')
         .expect('Content-Type', /json/)
         .end((err, res) => {
@@ -158,7 +158,7 @@ describe('Teamwork App', () => {
   describe('POST /articles', () => {
     it('responds with status code 201 - creates article', (done) => {
       request(app)
-        .post('/articles')
+        .post('/api/v1/articles')
         .end((err, res) => {
           expect(res.status).to.equal(201);
           done();
@@ -166,7 +166,7 @@ describe('Teamwork App', () => {
     });
     it('returns json object containing status success', (done) => {
       request(app)
-        .post('/articles')
+        .post('/api/v1/articles')
         .set('header', 'application/json')
         .send({
           article: 'string',
@@ -198,7 +198,7 @@ describe('Teamwork App', () => {
   describe('PATCH /articles/<:articleId>', () => {
     it('responds with status code 200 - can edit article', (done) => {
       request(app)
-        .patch('/articles/:articleId')
+        .patch('/api/v1/articles/:articleId')
         .end((err, res) => {
           if (err) return done(err);
           expect(res.status).to.equal(200);
@@ -207,7 +207,7 @@ describe('Teamwork App', () => {
     });
     it('returns json data containing status success', (done) => {
       request(app)
-        .patch('/articles/:articleId')
+        .patch('/api/v1/articles/:articleId')
         .set('header', 'application/json')
         .send({
           article: 'string',
@@ -235,7 +235,7 @@ describe('Teamwork App', () => {
   describe('DELETE /articles/<:articleId>', () => {
     it('returns json data and responds with status code 200', (done) => {
       request(app)
-        .delete('/articles/:articleId')
+        .delete('/api/v1/articles/:articleId')
         .set('header', 'application/json')
         .expect('Content-Type', /json/)
         .end((err, res) => {
@@ -258,7 +258,7 @@ describe('Teamwork App', () => {
   describe('DELETE /gifs/<:gifId>', () => {
     it('responds with status code 200 and returns json object', (done) => {
       request(app)
-        .delete('/gifs/:gifId')
+        .delete('/api/v1/gifs/:gifId')
         .set('header', 'application/json')
         .expect('Content-Type', /json/)
         .end((err, res) => {
@@ -281,7 +281,7 @@ describe('Teamwork App', () => {
   describe('POST /articles/<:articleId>/comment', () => {
     it('responds with status code 201', (done) => {
       request(app)
-        .post('/articles/:articleId/comment')
+        .post('/api/v1/articles/:articleId/comment')
         .end((err, res) => {
           if (err) return done(err);
           expect(res.status).to.equal(201);
@@ -290,7 +290,7 @@ describe('Teamwork App', () => {
     });
     it('returns json object containing comment and status success', (done) => {
       request(app)
-        .post('/articles/:articleId/comment')
+        .post('/api/v1/articles/:articleId/comment')
         .set('header', 'application/json')
         .send({ comment: 'string' })
         .expect('Content-Type', /json/)
@@ -319,7 +319,7 @@ describe('Teamwork App', () => {
   describe('POST /gifs/<:gifId>/comment', () => {
     it('responds with status code 201', (done) => {
       request(app)
-        .post('/gifs/:gifId/comment')
+        .post('/api/v1/gifs/:gifId/comment')
         .end((err, res) => {
           if (err) return done(err);
           expect(res.status).to.equal(201);
@@ -328,7 +328,7 @@ describe('Teamwork App', () => {
     });
     it('return json object with comment and status success', (done) => {
       request(app)
-        .post('/gifs/:gifId/comment')
+        .post('/api/v1/gifs/:gifId/comment')
         .set('header', 'application/json')
         .send({ comment: 'string' })
         .expect('Content-Type', /json/)

@@ -26,7 +26,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 
 // admin can create an employee user account
-app.post('/auth/create-user', (req, res, next) => {
+app.post('/api/v1/auth/create-user', (req, res, next) => {
   res.status(201).json({
     status: 'success',
     data: {
@@ -38,7 +38,7 @@ app.post('/auth/create-user', (req, res, next) => {
 });
 
 // Admin/Employee can login a user
-app.post('/auth/signin', (req, res, next) => {
+app.post('/api/v1/auth/signin', (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: { token: '', userId: 23456 }
@@ -46,7 +46,7 @@ app.post('/auth/signin', (req, res, next) => {
 });
 
 // employees can post gifs
-app.post('/gifs', (req, res, next) => {
+app.post('/api/v1/gifs', (req, res, next) => {
   res.status(201).json({
     status: 'success',
     data: {
@@ -60,7 +60,7 @@ app.post('/gifs', (req, res, next) => {
 });
 
 // employees can post articles
-app.post('/articles', (req, res, next) => {
+app.post('/api/v1/articles', (req, res, next) => {
   res.status(201).json({
     status: 'success',
     data: {
@@ -73,7 +73,7 @@ app.post('/articles', (req, res, next) => {
 });
 
 // employees can comment on other colleagues' article post
-app.post('/articles/:articleId/comment', (req, res, next) => {
+app.post('/api/v1/articles/:articleId/comment', (req, res, next) => {
   res.status(201).json({
     status: 'success',
     data: {
@@ -87,7 +87,7 @@ app.post('/articles/:articleId/comment', (req, res, next) => {
 });
 
 // employees can comment on other colleagues' gif post
-app.post('/gifs/:gifId/comment', (req, res, next) => {
+app.post('/api/v1/gifs/:gifId/comment', (req, res, next) => {
   res.status(201).json({
     status: 'success',
     data: {
@@ -100,7 +100,7 @@ app.post('/gifs/:gifId/comment', (req, res, next) => {
 });
 
 // employees can edit their articles
-app.patch('/articles/:articleId', (req, res, next) => {
+app.patch('/api/v1/articles/:articleId', (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: {
@@ -112,7 +112,7 @@ app.patch('/articles/:articleId', (req, res, next) => {
 });
 
 // employees can delete their articles
-app.delete('/articles/:articleId', (req, res, next) => {
+app.delete('/api/v1/articles/:articleId', (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: {
@@ -122,7 +122,7 @@ app.delete('/articles/:articleId', (req, res, next) => {
 });
 
 // employees can delete their gifs
-app.delete('/gifs/:gifId', (req, res, next) => {
+app.delete('/api/v1/gifs/:gifId', (req, res, next) => {
   res.status(200).json({
     status: 'success',
     data: {
@@ -131,7 +131,7 @@ app.delete('/gifs/:gifId', (req, res, next) => {
   });
 });
 
-app.get('/', (req, res) => {
+app.get('/api/v1/', (req, res) => {
   res.json({ message: 'Server starts successfully!' });
 });
 
