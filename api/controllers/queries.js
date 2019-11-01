@@ -1,10 +1,5 @@
-/* eslint-disable linebreak-style */
-/* eslint-disable quotes */
-/* eslint-disable comma-dangle */
-/* eslint arrow-parens: ["error", "as-needed"] */
-/* eslint-env es6 */
-
 const promise = require("bluebird");
+const bcrypt = require("bcrypt");
 
 // Initialize the library
 const initOptions = {
@@ -13,48 +8,54 @@ const initOptions = {
 const pgp = require("pg-promise")(initOptions);
 
 // for option of connection string
-// const connectString = "postgres://david:password@localhost:5432/teamwork";
+const connectString = "postgres://david:password@localhost:5432/teamwork";
 
-// Database connection details
-const cn = {
-  host: "localhost",
-  port: 5432,
-  database: "teamwork",
-  user: "david",
-  password: "password"
-};
-const db = pgp(cn); // database instance
+const db = pgp(connectString); // database instance
 
 // SQL query to post /auth/create-user
-const createEmployee = (req, res, next) => {
-  db.one({
-    text:
-      "INSERT INTO employee(firstName, lastName, email, password, gender, jobRole, department, address) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING employeesId",
-    values: [
-      req.body.firstName,
-      req.body.lastName,
-      req.body.email,
-      req.body.password,
-      req.body.gender,
-      req.body.jobRole,
-      req.body.department,
-      req.body.address
-    ]
-  })
-    .then(value => {
-      res.status(201).json({
-        status: "success",
-        data: {
-          message: "User account successfully created",
-          token: "",
-          userId: value.employeeId
-        }
-      });
+const createUser = (req, res, next) => {
+  bcrypt.hash(req.body.password, 10).then(password => {
+    const {
+      firstName,
+      lastName,
+      email,
+      gender,
+      jobRole,
+      department,
+      address
+    } = req.body;
+
+    db.one({
+      text:
+        'INSERT INTO employee("firstName", "lastName", email, password, gender, "jobRole", department, address) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING employeeid',
+      values: [
+        firstName,
+        lastName,
+        email,
+        password,
+        gender,
+        jobRole,
+        department,
+        address
+      ]
     })
-    .catch(err => next(err));
+      .then(value => {
+        res.status(201).json({
+          status: "success",
+          data: {
+            message: "User account successfully created",
+            token: "",
+            userId: value.employeeid
+          }
+        });
+      })
+      .catch(err => {
+        res.status(500).json(next(err));
+      });
+  });
 };
 
-// SQL query to POST /auth/sigin
+// SQL query to POST /auth/signin
 const signin = (req, res, next) => {
   db.any({
     text:
@@ -66,7 +67,7 @@ const signin = (req, res, next) => {
         status: "success",
         data: {
           token: "",
-          userId: value.id
+          userId: value.employeeid
         }
       });
     })
@@ -77,18 +78,21 @@ const signin = (req, res, next) => {
 
 // SQL query to POST /gifs
 const createGif = (req, res, next) => {
-  db.any({
-    text: "INSERT INTO Gif (imageUrl, title) VALUES($(imageUrl), $(title))",
-    values: [req.body.url, req.body.title]
+  const { title, image, date, comment } = req.body;
+  db.one({
+    text:
+      "INSERT INTO gif (title, image_url, date, comment) VALUES($1, $2, $3, $4) RETURNING gifid, title, image_url, date",
+    values: [title, image, date, comment]
   })
     .then(value => {
       res.status(200).json({
         status: "success",
         data: {
-          message: "GIF image successfully posted”",
+          gifid: value.gifid,
+          message: "GIF image successfully posted",
           createdOn: value.date,
           title: value.title,
-          imageUrl: value.imageUrl
+          imageUrl: value.image_url
         }
       });
     })
@@ -227,7 +231,7 @@ const commentGif = (req, res, next) => {
 };
 
 module.exports = {
-  createEmployee,
+  createUser,
   signin,
   createGif,
   createArticle,
