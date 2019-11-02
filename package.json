@@ -4,8 +4,7 @@
   "description": "An internal social network for employees in an organization.",
   "main": "server.js",
   "scripts": {
-    "mytest": "nyc mocha",
-    "test": "crossenv DATABASE_URL=postgres://postgres@localhost:5432/travis_ci_test nyc mocha",
+    "test": "nyc mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
     "start": "nodemon server.js"
   },
