@@ -6,3 +6,5 @@ cache:
   directories:
     - "node_modules"
 after_success: npm run coverage
+before_script:
+  - psql -c 'create database teamwork;' -U postgres
