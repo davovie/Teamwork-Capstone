@@ -8,7 +8,7 @@ const app = require('./app');
 /**
  * Normalize a port into a number, string, or false.
  */
-const normalizePort = (val) => {
+const normalizePort = val => {
   const port = parseInt(val, 10);
 
   if (isNaN(port)) {
@@ -34,7 +34,7 @@ const server = http.createServer(app);
 /**
  * Event listener for HTTP server "error" event.
  */
-const errorHandler = (error) => {
+const errorHandler = error => {
   if (error.syscall !== 'listen') {
     throw error;
   }

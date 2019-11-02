@@ -2,6 +2,8 @@ const promise = require("bluebird");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 
+// const cloudinary = require('cloudinary').v2;
+
 // Initialize the library
 const initOptions = {
   promiseLib: promise // overriding the default (ES6 Promise)
@@ -9,7 +11,8 @@ const initOptions = {
 const pgp = require("pg-promise")(initOptions);
 
 // for option of connection string
-const connectString = "postgres://david:password@localhost:5432/teamwork";
+const connectString = "postgres://postgres:password@localhost:5432/travis_ci_test";
+
 
 const db = pgp(connectString); // database instance
 
@@ -28,7 +31,7 @@ const createUser = (req, res, next) => {
 
     db.one({
       text:
-        'INSERT INTO employee("firstName", "lastName", email, password, gender, "jobRole", department, address) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING employeeid',
+        'INSERT INTO employee(firstname, lastname, email, password, gender, job_role, department, address) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING employeeid',
       values: [
         firstName,
         lastName,
@@ -104,7 +107,7 @@ const createGif = (req, res, next) => {
   const { title, image, date, comment } = req.body;
   db.one({
     text:
-      "INSERT INTO gif (title, image_url, date, comment) VALUES($1, $2, $3, $4) RETURNING gifid, title, image_url, date",
+      "INSERT INTO gif (title, image_url, date_created, comment) VALUES($1, $2, $3, $4) RETURNING gifid, title, image_url, date_created",
     values: [title, image, date, comment]
   })
     .then(value => {
@@ -113,7 +116,7 @@ const createGif = (req, res, next) => {
         data: {
           gifid: value.gifid,
           message: "GIF image successfully posted",
-          createdOn: value.date,
+          createdOn: value.date_created,
           title: value.title,
           imageUrl: value.image_url
         }
