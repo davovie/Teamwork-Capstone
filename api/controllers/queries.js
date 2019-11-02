@@ -1,5 +1,6 @@
 const promise = require("bluebird");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 
 // Initialize the library
 const initOptions = {
@@ -57,22 +58,44 @@ const createUser = (req, res, next) => {
 
 // SQL query to POST /auth/signin
 const signin = (req, res, next) => {
+  const { email, password } = req.body;
+  // Retrieve eamail and password from database
   db.any({
-    text:
-      "SELECT * FROM employee WHERE email = $(email) AND password = $(password)",
-    values: [req.params.email, req.params.password]
+    text: "SELECT $email, $password FROM employee"
   })
     .then(value => {
-      res.status(200).json({
-        status: "success",
-        data: {
-          token: "",
-          userId: value.employeeid
-        }
-      });
+      // compare recieved email address with database value
+      if (value.email === email) {
+        return res.status(401).json({
+          error: new Error("User not found")
+        });
+      }
+      // Use bcrypt to compare hash of sent password with database password hash
+      bcrypt
+        .compare(password, value.password)
+        .then(valid => {
+          if (!valid) {
+            return res.status(401).json({
+              error: new Error("Incorrect password")
+            });
+          }
+          const userToken = jwt.sign({ routeId: value.employeeid }, "RANDOM_TOKEN_SECRET", {
+            expiresIn: "24h"
+          });
+          res.status(200).json({
+            status: "success",
+            data: {
+              token: userToken,
+              userId: value.employeeid
+            }
+          });
+        })
+        .catch(err => {
+          res.status(500).json(next(err));
+        });
     })
     .catch(err => {
-      res.status(400).json(next(err));
+      res.status(500).json(next(err));
     });
 };
 
