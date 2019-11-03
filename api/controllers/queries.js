@@ -13,7 +13,6 @@ const pgp = require("pg-promise")(initOptions);
 // for option of connection string
 const connectString = "postgres://postgres:password@localhost:5432/travis_ci_test";
 
-
 const db = pgp(connectString); // database instance
 
 // SQL query to post /auth/create-user
@@ -31,7 +30,7 @@ const createUser = (req, res, next) => {
 
     db.one({
       text:
-        'INSERT INTO employee(firstname, lastname, email, password, gender, job_role, department, address) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING employeeid',
+        "INSERT INTO employee(firstname, lastname, email, password, gender, job_role, department, address) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING employeeid",
       values: [
         firstName,
         lastName,
@@ -61,35 +60,43 @@ const createUser = (req, res, next) => {
 
 // SQL query to POST /auth/signin
 const signin = (req, res, next) => {
+  console.log(req.body);
   const { email, password } = req.body;
-  // Retrieve eamail and password from database
-  db.any({
-    text: "SELECT $email, $password FROM employee"
-  })
+  // Retrieve all values from database where email match
+  db.any(
+    "SELECT  * FROM employee WHERE email = $(email)",
+    { email }
+  )
     .then(value => {
+      console.log(value);
       // compare recieved email address with database value
-      if (value.email === email) {
+      if (value[0].email !== email) {
         return res.status(401).json({
           error: new Error("User not found")
         });
       }
       // Use bcrypt to compare hash of sent password with database password hash
       bcrypt
-        .compare(password, value.password)
+        .compare(password, value[0].password)
         .then(valid => {
           if (!valid) {
             return res.status(401).json({
               error: new Error("Incorrect password")
             });
           }
-          const userToken = jwt.sign({ routeId: value.employeeid }, "RANDOM_TOKEN_SECRET", {
-            expiresIn: "24h"
-          });
+          const userToken = jwt.sign(
+            { routeId: value[0].employeeid },
+            "RANDOM_TOKEN_SECRET",
+            {
+              expiresIn: "24h"
+            }
+          );
+          console.log(userToken);
           res.status(200).json({
             status: "success",
             data: {
               token: userToken,
-              userId: value.employeeid
+              userId: value[0].employeeid
             }
           });
         })

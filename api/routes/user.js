@@ -8,11 +8,6 @@ const teamworkQuery = require("../controllers/queries");
 router.post("/create-user", teamworkQuery.createUser);
 
 // Admin/Employee can login a user
-router.post("/signin", (req, res, next) => {
-  res.status(200).json({
-    status: "success",
-    data: { token: "", userId: 23456 }
-  });
-});
+router.post("/signin", teamworkQuery.signin);
 
 module.exports = router;

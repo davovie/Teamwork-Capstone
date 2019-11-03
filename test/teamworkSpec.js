@@ -74,10 +74,14 @@ describe("Teamwork App", () => {
   });
 
   // Test - Admin/Employee can log in
-  describe("POST /auth/signin", () => {
+  describe.only("POST /auth/signin", () => {
     it("responds with status code 200", done => {
       request(app)
         .post("/api/v1/auth/signin")
+        .send({
+          email: "foo@bar.com",
+          password: "123pass234word"
+        })
         .end((err, res) => {
           if (err) return done(err);
           expect(res.status).to.equal(200);
@@ -88,8 +92,8 @@ describe("Teamwork App", () => {
       request(app)
         .post("/api/v1/auth/signin")
         .send({
-          email: "string",
-          password: "string"
+          email: "foo@bar.com",
+          password: "123pass234word"
         })
         .expect("Content-Type", /json/)
         .end((err, res) => {
@@ -174,6 +178,11 @@ describe("Teamwork App", () => {
     it("responds with status code 201 - creates article", done => {
       request(app)
         .post("/api/v1/articles")
+        .send({
+          article: "string",
+          title: "string"
+        })
+        .expect("Content-Type", /json/)
         .end((err, res) => {
           expect(res.status).to.equal(201);
           done();
