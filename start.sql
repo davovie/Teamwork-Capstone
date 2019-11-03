@@ -1,4 +1,4 @@
-CREATE TABLE travis_ci_test.public.employee (
+CREATE TABLE employee (
 	firstname varchar(200) DEFAULT 'varchar'::character varying NOT NULL,
 	lastname varchar(200) DEFAULT 'varchar'::character varying NOT NULL,
 	email varchar(400) DEFAULT 'varchar'::character varying NOT NULL,
@@ -11,7 +11,7 @@ CREATE TABLE travis_ci_test.public.employee (
 	PRIMARY KEY (employeeid)
 );
 
-CREATE TABLE travis_ci_test.public.gif (
+CREATE TABLE gif (
 	gifid serial NOT NULL,
 	title varchar(200) DEFAULT 'varchar'::character varying,
 	image_url varchar(8000) DEFAULT 'varchar'::character varying,
