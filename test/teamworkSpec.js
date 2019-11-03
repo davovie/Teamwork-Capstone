@@ -41,7 +41,7 @@ describe("Teamwork App", () => {
         })
         .catch(err => done(err));
     });
-    it("returns json data containing status success", done => {
+    it("returns json data containing status success and token", done => {
       request(app)
         .post("/api/v1/auth/create-user")
         .send({
@@ -73,7 +73,7 @@ describe("Teamwork App", () => {
     });
   });
 
-  // Test - Admin/Employee can log in
+  // Test - Admin/Employee can sign in
   describe("POST /auth/signin", () => {
     it("responds with status code 200", done => {
       request(app)
@@ -88,7 +88,7 @@ describe("Teamwork App", () => {
           done();
         });
     });
-    it("returns json data containing status success", done => {
+    it("returns json data containing status success and token", done => {
       request(app)
         .post("/api/v1/auth/signin")
         .send({
