@@ -60,7 +60,6 @@ const createUser = (req, res, next) => {
 
 // SQL query to POST /auth/signin
 const signin = (req, res, next) => {
-  console.log(req.body);
   const { email, password } = req.body;
   // Retrieve all values from database where email match
   db.any(
@@ -68,7 +67,6 @@ const signin = (req, res, next) => {
     { email }
   )
     .then(value => {
-      console.log(value);
       // compare recieved email address with database value
       if (value[0].email !== email) {
         return res.status(401).json({
@@ -91,7 +89,6 @@ const signin = (req, res, next) => {
               expiresIn: "24h"
             }
           );
-          console.log(userToken);
           res.status(200).json({
             status: "success",
             data: {
