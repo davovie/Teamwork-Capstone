@@ -74,7 +74,7 @@ describe("Teamwork App", () => {
   });
 
   // Test - Admin/Employee can log in
-  describe.only("POST /auth/signin", () => {
+  describe("POST /auth/signin", () => {
     it("responds with status code 200", done => {
       request(app)
         .post("/api/v1/auth/signin")
