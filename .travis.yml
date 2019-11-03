@@ -5,25 +5,10 @@ node_js:
 cache:
   directories:
     - "node_modules"
+    - "test"
 after_success: npm run coverage
 before_script:
   psql -c 'create database travis_ci_test;' -U postgres
-  #  -c 'create table employee;' -U postgres
-  #  -c 'create table gif;' -U postgres
-  #  -c 'alter table employee add column firstname varchar(200) default varchar not null;' -U postgres
-  #  -c 'alter table employee add column lastname varchar(200) default varchar not null;' -U postgres
-  #  -c 'alter table employee add column email varchar(400) default varchar not null;' -U postgres
-  #  -c 'alter table employee add column password varchar(2000) default varchar not null;' -U postgres
-  #  -c 'alter table employee add column gender varchar(200) default varchar not null;' -U postgres
-  #  -c 'alter table employee add column job_role varchar(800) default varchar not null;' -U postgres
-  #  -c 'alter table employee add column department varchar(800) default varchar not null;' -U postgres
-  #  -c 'alter table employee add column address varchar(5000) default varchar not null;' -U postgres
-  #  -c 'alter table employee add column employeeid serial primary key;' -U postgres
-  #  -c 'alter table gif add column gifid serial primary key;' -U postgres
-  #  -c 'alter table gif add column title varchar(400) default varchar null;' -U postgres
-  #  -c 'alter table gif add column image_url varchar(8000) default varchar null;' -U postgres
-  #  -c 'alter table gif add column date_created timestamp default current_timestamp not null;' -U postgres
-  #  -c 'alter table gif add column comment varchar(7000) default varchar null;' -U postgres
   
 services:
   - postgresql
