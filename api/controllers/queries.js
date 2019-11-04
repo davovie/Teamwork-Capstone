@@ -1,19 +1,10 @@
-const promise = require("bluebird");
+
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
+const db = require("./db");
 
 // const cloudinary = require('cloudinary').v2;
 
-// Initialize the library
-const initOptions = {
-  promiseLib: promise // overriding the default (ES6 Promise)
-};
-const pgp = require("pg-promise")(initOptions);
-
-// for option of connection string
-const connectString = "postgres://postgres:password@localhost:5432/travis_ci_test";
-
-const db = pgp(connectString); // database instance
 
 // SQL query to post /auth/create-user
 const createUser = (req, res, next) => {
@@ -43,11 +34,18 @@ const createUser = (req, res, next) => {
       ]
     })
       .then(value => {
+        const userToken = jwt.sign(
+          { routeId: value.employeeid },
+          "RANDOM_TOKEN_SECRET",
+          {
+            expiresIn: "24h"
+          }
+        );
         res.status(201).json({
           status: "success",
           data: {
             message: "User account successfully created",
-            token: "",
+            token: userToken,
             userId: value.employeeid
           }
         });
