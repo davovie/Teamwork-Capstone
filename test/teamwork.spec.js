@@ -8,6 +8,27 @@ const db = require("../api/controllers/db");
 const usr = require("./data");
 
 describe("Teamwork App", () => {
+  let userToken;
+  before(done => {
+    db.none("TRUNCATE TABLE employee").then(() => {
+      db.one(
+        `INSERT INTO employee (${Object.keys(usr.defaultUser).join(
+          ", "
+        )}) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING employeeid`,
+        Object.values(usr.defaultUser)
+      ).then(val => {
+        userToken = jwt.sign(
+          { userid: val.employeeid },
+          "RANDOM_TOKEN_SECRET",
+          {
+            expiresIn: "24h"
+          }
+        );
+        done();
+      });
+      // db.one(`INSERT INTO employee ('firatname', 'lastname', 'email', 'password', ')VALUE`)
+    });
+  });
   describe("GET /", () => {
     it("responds with json", done => {
       request(app)
@@ -27,7 +48,7 @@ describe("Teamwork App", () => {
     it("respond with status 201 and returns json data containing token", done => {
       request(app)
         .post("/api/v1/auth/create-user")
-        .send(usr.defaultUser)
+        .send(usr.testUser)
         .expect("Content-Type", /json/)
         .then(res => {
           const {
@@ -105,25 +126,6 @@ describe("Teamwork App", () => {
 
   // employees can Post gifs
   describe.only("POST /gifs", () => {
-    let userToken;
-    before(done => {
-      // Login a user and generate token
-      const { email } = usr.userLogin;
-      db.any("SELECT  employeeid FROM employee WHERE email = $(email)", {
-        email
-      }).then(data => {
-        console.log(data);
-        userToken = jwt.sign(
-          { userid: data[0].employeeid },
-          "RANDOM_TOKEN_SECRET",
-          {
-            expiresIn: "1h"
-          }
-        );
-        console.log(userToken);
-      });
-      done();
-    });
     it("responds with status code 200 - gif posted successfully", done => {
       console.log("Token in it", userToken);
       request(app)
