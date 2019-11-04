@@ -1,8 +1,11 @@
-
+/* eslint-disable no-undef */
 const request = require("supertest");
 const { expect } = require("chai");
-const moment = require('moment');
+const moment = require("moment");
+const bcrypt = require("bcrypt");
 const app = require("../app");
+const db = require("../api/controllers/db");
+const usr = require("./data");
 
 describe("Teamwork App", () => {
   describe("GET /", () => {
@@ -21,39 +24,10 @@ describe("Teamwork App", () => {
 
   // Test - admin can create an employee user account
   describe("POST /auth/create-user", () => {
-    it("responds with status code 201", done => {
+    it("respond with status 201 and returns json data containing token", done => {
       request(app)
         .post("/api/v1/auth/create-user")
-        .send({
-          firstName: "John",
-          lastName: "Carpenter",
-          email: "foo@bar.com",
-          password: "123pass234word",
-          gender: "Male",
-          jobRole: "Manager",
-          department: "Human Resources",
-          address: "Apapa, Lagos, Nigeria"
-        })
-        .expect("Content-Type", /json/)
-        .then(res => {
-          expect(res.status).to.equal(201);
-          done();
-        })
-        .catch(err => done(err));
-    });
-    it("returns json data containing status success", done => {
-      request(app)
-        .post("/api/v1/auth/create-user")
-        .send({
-          firstName: "Peter",
-          lastName: "Matthew",
-          email: "pet.mat@grifon.com",
-          password: "red123mond",
-          gender: "Male",
-          jobRole: "Assistant Manager",
-          department: "Warehouse",
-          address: "Ketu, lagos, Nigeria"
-        })
+        .send(usr.defaultUser)
         .expect("Content-Type", /json/)
         .then(res => {
           const {
@@ -62,6 +36,7 @@ describe("Teamwork App", () => {
               data: { message, token, userId }
             }
           } = res;
+          expect(res.status).to.equal(201);
           expect(status).to.equal("success");
           expect(message).to.equal("User account successfully created");
           expect(token).to.be.a("string");
@@ -73,23 +48,56 @@ describe("Teamwork App", () => {
     });
   });
 
-  // Test - Admin/Employee can log in
+  // Test - Admin/Employee can sign in
   describe("POST /auth/signin", () => {
+    before(done => {
+      bcrypt.hash(usr.testUser.password, 10).then(password => {
+        const {
+          firstName,
+          lastName,
+          email,
+          gender,
+          jobRole,
+          department,
+          address
+        } = usr.testUser;
+        db.one({
+          text:
+            "INSERT INTO employee (firstname, lastname, email, password, gender, job_role, department, address) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING email, password, employeeid",
+          values: [
+            firstName,
+            lastName,
+            email,
+            password,
+            gender,
+            jobRole,
+            department,
+            address
+          ]
+        });
+        done();
+      });
+    });
+
     it("responds with status code 200", done => {
       request(app)
         .post("/api/v1/auth/signin")
+        .send({
+          email: "foo@bar.com",
+          password: "123pass234word"
+        })
         .end((err, res) => {
           if (err) return done(err);
           expect(res.status).to.equal(200);
           done();
         });
     });
-    it("returns json data containing status success", done => {
+    it("returns json data containing status success and token", done => {
       request(app)
         .post("/api/v1/auth/signin")
         .send({
-          email: "string",
-          password: "string"
+          email: "foo@bar.com",
+          password: "123pass234word"
         })
         .expect("Content-Type", /json/)
         .end((err, res) => {
@@ -174,6 +182,11 @@ describe("Teamwork App", () => {
     it("responds with status code 201 - creates article", done => {
       request(app)
         .post("/api/v1/articles")
+        .send({
+          article: "string",
+          title: "string"
+        })
+        .expect("Content-Type", /json/)
         .end((err, res) => {
           expect(res.status).to.equal(201);
           done();
