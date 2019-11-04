@@ -1,3 +1,6 @@
+const moment = require("moment");
+
+// Employee account creation and signin data
 exports.defaultUser = {
   firstName: "Peter",
   lastName: "Matthew",
@@ -18,4 +21,16 @@ exports.testUser = {
   jobRole: "Manager",
   department: "Human Resources",
   address: "Apapa, Lagos, Nigeria"
+};
+
+exports.userLogin = {
+  email: "foo@bar.com",
+  password: "123pass234word"
+};
+
+// create a gif post
+exports.testGif = {
+  title: "DevC Training with Andela",
+  image: "image_Gif",
+  date: moment()
 };

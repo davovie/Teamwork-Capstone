@@ -1,8 +1,8 @@
 /* eslint-disable no-undef */
 const request = require("supertest");
 const { expect } = require("chai");
-const moment = require("moment");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const app = require("../app");
 const db = require("../api/controllers/db");
 const usr = require("./data");
@@ -50,6 +50,7 @@ describe("Teamwork App", () => {
 
   // Test - Admin/Employee can sign in
   describe("POST /auth/signin", () => {
+    // Create an Employee account to ensure signin
     before(done => {
       bcrypt.hash(usr.testUser.password, 10).then(password => {
         const {
@@ -79,26 +80,10 @@ describe("Teamwork App", () => {
       });
     });
 
-    it("responds with status code 200", done => {
+    it("responds with status code 200 and returns json data containing token", done => {
       request(app)
         .post("/api/v1/auth/signin")
-        .send({
-          email: "foo@bar.com",
-          password: "123pass234word"
-        })
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res.status).to.equal(200);
-          done();
-        });
-    });
-    it("returns json data containing status success and token", done => {
-      request(app)
-        .post("/api/v1/auth/signin")
-        .send({
-          email: "foo@bar.com",
-          password: "123pass234word"
-        })
+        .send(usr.userLogin)
         .expect("Content-Type", /json/)
         .end((err, res) => {
           if (err) return done(err);
@@ -108,6 +93,7 @@ describe("Teamwork App", () => {
               data: { token, userId }
             }
           } = res;
+          expect(res.status).to.equal(200);
           expect(status).to.equal("success");
           expect(token).to.be.a("string");
           expect(userId).to.be.a("number");
@@ -118,15 +104,32 @@ describe("Teamwork App", () => {
   });
 
   // employees can Post gifs
-  describe("POST /gifs", () => {
+  describe.only("POST /gifs", () => {
+    let userToken;
+    before(done => {
+      // Login a user and generate token
+      const { email } = usr.userLogin;
+      db.any("SELECT  employeeid FROM employee WHERE email = $(email)", {
+        email
+      }).then(data => {
+        console.log(data);
+        userToken = jwt.sign(
+          { userid: data[0].employeeid },
+          "RANDOM_TOKEN_SECRET",
+          {
+            expiresIn: "1h"
+          }
+        );
+        console.log(userToken);
+      });
+      done();
+    });
     it("responds with status code 200 - gif posted successfully", done => {
+      console.log("Token in it", userToken);
       request(app)
         .post("/api/v1/gifs")
-        .send({
-          title: "DevC Training with Andela",
-          image: "image_Gif",
-          date: moment()
-        })
+        .send(usr.testGif)
+        .set("authorization", userToken)
         .end((err, res) => {
           if (err) return done(err);
           expect(res.status).to.equal(200);
@@ -150,12 +153,8 @@ describe("Teamwork App", () => {
     it("returns json object with status success", done => {
       request(app)
         .post("/api/v1/gifs")
-        .set("header", "application/json")
-        .send({
-          title: "DevC Training with Andela",
-          image: "image_Gif",
-          date: moment()
-        })
+        .set("header", userToken)
+        .send(usr.testGif)
         .expect("Content-Type", /json/)
         .end((err, res) => {
           if (err) return done(err);
