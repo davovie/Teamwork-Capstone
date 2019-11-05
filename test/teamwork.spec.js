@@ -203,7 +203,7 @@ describe("Teamwork App", () => {
   });
 
   // employees can edit their article
-  describe("PATCH /articles/<:articleId>", () => {
+  describe("PATCH /articles/<articleId>", () => {
     let articleid;
     before(done => {
       db.one(
@@ -240,11 +240,22 @@ describe("Teamwork App", () => {
   });
 
   // employees can delete their articles
-  describe("DELETE /articles/<:articleId>", () => {
+  describe("DELETE /articles/<articleId>", () => {
+    let articleid;
+    before(done => {
+      db.one(
+        // Insert default Article into table article
+        "INSERT INTO article (title, article) VALUES ($1, $2) RETURNING articleid",
+        [usr.defaultArticle.title, usr.defaultArticle.article]
+      ).then(val => {
+        articleid = val.articleid;
+        done();
+      });
+    });
     it("returns json data and responds with status code 200", done => {
       request(app)
-        .delete("/api/v1/articles/:articleId")
-        .set("header", "application/json")
+        .delete(`/api/v1/articles/${articleid}`)
+        .set("authorization", userToken)
         .expect("Content-Type", /json/)
         .end((err, res) => {
           if (err) return done(err);
@@ -263,7 +274,7 @@ describe("Teamwork App", () => {
   });
 
   // employees can delete their gif
-  describe("DELETE /gifs/<:gifId>", () => {
+  describe("DELETE /gifs/<gifId>", () => {
     it("responds with status code 200 and returns json object", done => {
       request(app)
         .delete("/api/v1/gifs/:gifId")
