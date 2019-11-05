@@ -12,24 +12,25 @@ describe("Teamwork App", () => {
   before(done => {
     // clear table employee of all data
     db.none("TRUNCATE TABLE employee").then(() => {
-      db.one(
-        // insert in a default user
-        `INSERT INTO employee (${Object.keys(usr.defaultUser).join(
-          ", "
-        )}) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING employeeid`,
-        Object.values(usr.defaultUser)
-      ).then(val => {
-        // generate token for default user
-        userToken = jwt.sign(
-          { userid: val.employeeid },
-          "RANDOM_TOKEN_SECRET",
-          {
-            expiresIn: "1h"
-          }
-        );
-        done();
+      db.none("TRUNCATE TABLE article").then(() => {
+        db.one(
+          // insert in a default user
+          `INSERT INTO employee (${Object.keys(usr.defaultUser).join(
+            ", "
+          )}) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING employeeid`,
+          Object.values(usr.defaultUser)
+        ).then(val => {
+          // generate token for default user
+          userToken = jwt.sign(
+            { userid: val.employeeid },
+            "RANDOM_TOKEN_SECRET",
+            {
+              expiresIn: "1h"
+            }
+          );
+          done();
+        });
       });
-      // db.one(`INSERT INTO employee ('firatname', 'lastname', 'email', 'password', ')VALUE`)
     });
   });
   describe("GET /", () => {
@@ -175,15 +176,11 @@ describe("Teamwork App", () => {
 
   // employees can create article
   describe("POST /articles", () => {
-    before(() => {
-      // clear the table article of all data to ensure test is independent
-      db.none("TRUNCATE TABLE article");
-    });
     it("responds with status code 201 and returns json data", done => {
       request(app)
         .post("/api/v1/articles")
         .set("authorization", userToken)
-        .send(usr.testArticle)
+        .send(usr.defaultArticle)
         .expect("Content-Type", /json/)
         .end((err, res) => {
           if (err) return done(err);
@@ -207,23 +204,22 @@ describe("Teamwork App", () => {
 
   // employees can edit their article
   describe("PATCH /articles/<:articleId>", () => {
-    it("responds with status code 200 - can edit article", done => {
-      request(app)
-        .patch("/api/v1/articles/:articleId")
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res.status).to.equal(200);
-          done();
-        });
+    let articleid;
+    before(done => {
+      db.one(
+        // Insert default Article into table article
+        "INSERT INTO article (title, article) VALUES ($1, $2) RETURNING articleid",
+        [usr.defaultArticle.title, usr.defaultArticle.article]
+      ).then(val => {
+        articleid = val.articleid;
+        done();
+      });
     });
-    it("returns json data containing status success", done => {
+    it("responds with status code 201 and returns json data", done => {
       request(app)
-        .patch("/api/v1/articles/:articleId")
-        .set("header", "application/json")
-        .send({
-          article: "string",
-          title: "string"
-        })
+        .patch(`/api/v1/articles/${articleid}`)
+        .set("authorization", userToken)
+        .send(usr.editedArticle)
         .expect("Content-Type", /json/)
         .end((err, res) => {
           if (err) return done(err);
@@ -233,6 +229,7 @@ describe("Teamwork App", () => {
               data: { message, title, article }
             }
           } = res;
+          expect(res.status).to.equal(201);
           expect(status).to.equal("success");
           expect(message).to.be.equal("Article successfully updated");
           expect(title).to.be.a("string");
