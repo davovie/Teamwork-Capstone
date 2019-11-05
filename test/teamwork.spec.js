@@ -10,13 +10,16 @@ const usr = require("./data");
 describe("Teamwork App", () => {
   let userToken;
   before(done => {
+    // clear table employee of all data
     db.none("TRUNCATE TABLE employee").then(() => {
       db.one(
+        // insert in a default user
         `INSERT INTO employee (${Object.keys(usr.defaultUser).join(
           ", "
         )}) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING employeeid`,
         Object.values(usr.defaultUser)
       ).then(val => {
+        // generate token for default user
         userToken = jwt.sign(
           { userid: val.employeeid },
           "RANDOM_TOKEN_SECRET",
@@ -48,7 +51,7 @@ describe("Teamwork App", () => {
     it("respond with status 201 and returns json data containing token", done => {
       request(app)
         .post("/api/v1/auth/create-user")
-        .send(usr.testUser)
+        .send(usr.testUser) // Send test user signin credentials
         .expect("Content-Type", /json/)
         .then(res => {
           const {
@@ -82,7 +85,7 @@ describe("Teamwork App", () => {
           jobRole,
           department,
           address
-        } = usr.testUser;
+        } = usr.testUser; // receive form data for test user
         db.one({
           text:
             "INSERT INTO employee (firstname, lastname, email, password, gender, job_role, department, address) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING email, password, employeeid",
@@ -104,7 +107,7 @@ describe("Teamwork App", () => {
     it("responds with status code 200 and returns json data containing token", done => {
       request(app)
         .post("/api/v1/auth/signin")
-        .send(usr.userLogin)
+        .send(usr.userLogin) // send test user signin credential
         .expect("Content-Type", /json/)
         .end((err, res) => {
           if (err) return done(err);
@@ -172,27 +175,15 @@ describe("Teamwork App", () => {
 
   // employees can create article
   describe("POST /articles", () => {
-    it("responds with status code 201 - creates article", done => {
-      request(app)
-        .post("/api/v1/articles")
-        .send({
-          article: "string",
-          title: "string"
-        })
-        .expect("Content-Type", /json/)
-        .end((err, res) => {
-          expect(res.status).to.equal(201);
-          done();
-        });
+    before(() => {
+      // clear the table article of all data to ensure test is independent
+      db.none("TRUNCATE TABLE article");
     });
-    it("returns json object containing status success", done => {
+    it("responds with status code 201 and returns json data", done => {
       request(app)
         .post("/api/v1/articles")
-        .set("header", "application/json")
-        .send({
-          article: "string",
-          title: "string"
-        })
+        .set("authorization", userToken)
+        .send(usr.testArticle)
         .expect("Content-Type", /json/)
         .end((err, res) => {
           if (err) return done(err);
@@ -202,6 +193,7 @@ describe("Teamwork App", () => {
               data: { message, articleId, createdOn, title }
             }
           } = res;
+          expect(res.status).to.equal(201);
           expect(status).to.equal("success");
           expect(message).to.be.equal("Article successfully posted");
           expect(createdOn).to.be.a("string");
