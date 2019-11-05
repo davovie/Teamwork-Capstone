@@ -98,7 +98,6 @@ const signin = (req, res, next) => {
 
 // SQL query to POST /gifs
 const createGif = (req, res, next) => {
-  console.log(req.body);
   const { title, image, date, comment } = req.body;
   db.one({
     text:

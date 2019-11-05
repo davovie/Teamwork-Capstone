@@ -18,10 +18,9 @@ const checkToken = (req, res, next) => {
 
 const auth = (req, res, next) => {
   try {
-    const token = req.headers.authorization.split(' ')[1];
-    console.log(token);
+    const stringArray = req.headers.authorization.split(' ');
+    const token = stringArray[1] ? stringArray[1] : stringArray[0];
     const decodedToken = jwt.verify(token, 'RANDOM_TOKEN_SECRET');
-    console.log('We are here');
     const userid = decodedToken.employeeId;
     if (req.body.employeeid && req.body.employeeid !== userid) {
       throw 'Invalid user ID';

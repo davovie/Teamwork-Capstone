@@ -21,7 +21,7 @@ describe("Teamwork App", () => {
           { userid: val.employeeid },
           "RANDOM_TOKEN_SECRET",
           {
-            expiresIn: "24h"
+            expiresIn: "1h"
           }
         );
         done();
@@ -125,18 +125,9 @@ describe("Teamwork App", () => {
   });
 
   // employees can Post gifs
-  describe.only("POST /gifs", () => {
-    it("responds with status code 200 - gif posted successfully", done => {
-      console.log("Token in it", userToken);
-      request(app)
-        .post("/api/v1/gifs")
-        .send(usr.testGif)
-        .set("authorization", userToken)
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res.status).to.equal(200);
-          done();
-        });
+  describe("POST /gifs", () => {
+    before(() => {
+      db.none("TRUNCATE TABLE gif");
     });
     // it("successfully uploads gif to cloudinary", function(done) {
     //   request(app)
@@ -152,10 +143,10 @@ describe("Teamwork App", () => {
     //       done();
     //     });
     // });
-    it("returns json object with status success", done => {
+    it("responds with status 201 and returns json object", done => {
       request(app)
         .post("/api/v1/gifs")
-        .set("header", userToken)
+        .set("authorization", userToken)
         .send(usr.testGif)
         .expect("Content-Type", /json/)
         .end((err, res) => {
@@ -166,6 +157,7 @@ describe("Teamwork App", () => {
               data: { gifid, message, createdOn, title, imageUrl }
             }
           } = res;
+          expect(res.status).to.equal(200);
           expect(status).to.equal("success");
           expect(message).to.be.equal("GIF image successfully posted");
           expect(createdOn).to.be.a("string");
