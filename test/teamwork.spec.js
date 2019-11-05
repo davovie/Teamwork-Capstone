@@ -1,13 +1,34 @@
 /* eslint-disable no-undef */
 const request = require("supertest");
 const { expect } = require("chai");
-const moment = require("moment");
 const bcrypt = require("bcrypt");
+const jwt = require("jsonwebtoken");
 const app = require("../app");
 const db = require("../api/controllers/db");
 const usr = require("./data");
 
 describe("Teamwork App", () => {
+  let userToken;
+  before(done => {
+    db.none("TRUNCATE TABLE employee").then(() => {
+      db.one(
+        `INSERT INTO employee (${Object.keys(usr.defaultUser).join(
+          ", "
+        )}) VALUES($1, $2, $3, $4, $5, $6, $7, $8) RETURNING employeeid`,
+        Object.values(usr.defaultUser)
+      ).then(val => {
+        userToken = jwt.sign(
+          { userid: val.employeeid },
+          "RANDOM_TOKEN_SECRET",
+          {
+            expiresIn: "1h"
+          }
+        );
+        done();
+      });
+      // db.one(`INSERT INTO employee ('firatname', 'lastname', 'email', 'password', ')VALUE`)
+    });
+  });
   describe("GET /", () => {
     it("responds with json", done => {
       request(app)
@@ -27,7 +48,7 @@ describe("Teamwork App", () => {
     it("respond with status 201 and returns json data containing token", done => {
       request(app)
         .post("/api/v1/auth/create-user")
-        .send(usr.defaultUser)
+        .send(usr.testUser)
         .expect("Content-Type", /json/)
         .then(res => {
           const {
@@ -50,6 +71,7 @@ describe("Teamwork App", () => {
 
   // Test - Admin/Employee can sign in
   describe("POST /auth/signin", () => {
+    // Create an Employee account to ensure signin
     before(done => {
       bcrypt.hash(usr.testUser.password, 10).then(password => {
         const {
@@ -79,26 +101,10 @@ describe("Teamwork App", () => {
       });
     });
 
-    it("responds with status code 200", done => {
+    it("responds with status code 200 and returns json data containing token", done => {
       request(app)
         .post("/api/v1/auth/signin")
-        .send({
-          email: "foo@bar.com",
-          password: "123pass234word"
-        })
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res.status).to.equal(200);
-          done();
-        });
-    });
-    it("returns json data containing status success and token", done => {
-      request(app)
-        .post("/api/v1/auth/signin")
-        .send({
-          email: "foo@bar.com",
-          password: "123pass234word"
-        })
+        .send(usr.userLogin)
         .expect("Content-Type", /json/)
         .end((err, res) => {
           if (err) return done(err);
@@ -108,6 +114,7 @@ describe("Teamwork App", () => {
               data: { token, userId }
             }
           } = res;
+          expect(res.status).to.equal(200);
           expect(status).to.equal("success");
           expect(token).to.be.a("string");
           expect(userId).to.be.a("number");
@@ -119,19 +126,8 @@ describe("Teamwork App", () => {
 
   // employees can Post gifs
   describe("POST /gifs", () => {
-    it("responds with status code 200 - gif posted successfully", done => {
-      request(app)
-        .post("/api/v1/gifs")
-        .send({
-          title: "DevC Training with Andela",
-          image: "image_Gif",
-          date: moment()
-        })
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res.status).to.equal(200);
-          done();
-        });
+    before(() => {
+      db.none("TRUNCATE TABLE gif");
     });
     // it("successfully uploads gif to cloudinary", function(done) {
     //   request(app)
@@ -147,15 +143,11 @@ describe("Teamwork App", () => {
     //       done();
     //     });
     // });
-    it("returns json object with status success", done => {
+    it("responds with status 201 and returns json object", done => {
       request(app)
         .post("/api/v1/gifs")
-        .set("header", "application/json")
-        .send({
-          title: "DevC Training with Andela",
-          image: "image_Gif",
-          date: moment()
-        })
+        .set("authorization", userToken)
+        .send(usr.testGif)
         .expect("Content-Type", /json/)
         .end((err, res) => {
           if (err) return done(err);
@@ -165,6 +157,7 @@ describe("Teamwork App", () => {
               data: { gifid, message, createdOn, title, imageUrl }
             }
           } = res;
+          expect(res.status).to.equal(200);
           expect(status).to.equal("success");
           expect(message).to.be.equal("GIF image successfully posted");
           expect(createdOn).to.be.a("string");

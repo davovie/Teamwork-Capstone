@@ -2,11 +2,12 @@
 const express = require("express");
 const moment = require('moment');
 const teamworkQuery = require('../controllers/queries');
+const routeAuth = require("../auth/auth");
 
 const router = express.Router();
 
 // employees can post gifs
-router.post("/gifs", teamworkQuery.createGif);
+router.post("/gifs", routeAuth.auth, teamworkQuery.createGif);
 
 // employees can post articles
 router.post("/articles", (req, res, next) => {

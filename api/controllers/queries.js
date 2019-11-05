@@ -1,10 +1,8 @@
-
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const db = require("./db");
 
 // const cloudinary = require('cloudinary').v2;
-
 
 // SQL query to post /auth/create-user
 const createUser = (req, res, next) => {
@@ -35,7 +33,7 @@ const createUser = (req, res, next) => {
     })
       .then(value => {
         const userToken = jwt.sign(
-          { routeId: value.employeeid },
+          { userid: value.employeeid },
           "RANDOM_TOKEN_SECRET",
           {
             expiresIn: "24h"
@@ -60,10 +58,7 @@ const createUser = (req, res, next) => {
 const signin = (req, res, next) => {
   const { email, password } = req.body;
   // Retrieve all values from database where email match
-  db.any(
-    "SELECT  * FROM employee WHERE email = $(email)",
-    { email }
-  )
+  db.any("SELECT  * FROM employee WHERE email = $(email)", { email })
     .then(value => {
       // compare recieved email address with database value
       if (value[0].email !== email) {
@@ -81,11 +76,8 @@ const signin = (req, res, next) => {
             });
           }
           const userToken = jwt.sign(
-            { routeId: value[0].employeeid },
-            "RANDOM_TOKEN_SECRET",
-            {
-              expiresIn: "24h"
-            }
+            { userid: value[0].employeeid },
+            "RANDOM_TOKEN_SECRET", { expiresIn: "1h" }
           );
           res.status(200).json({
             status: "success",
