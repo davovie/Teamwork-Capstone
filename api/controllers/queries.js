@@ -77,7 +77,8 @@ const signin = (req, res, next) => {
           }
           const userToken = jwt.sign(
             { userid: value[0].employeeid },
-            "RANDOM_TOKEN_SECRET", { expiresIn: "1h" }
+            "RANDOM_TOKEN_SECRET",
+            { expiresIn: "1h" }
           );
           res.status(200).json({
             status: "success",
@@ -147,10 +148,12 @@ const createArticle = (req, res, next) => {
 
 // SQL query for PATCH /articles/<:articleId>
 const editArticle = (req, res, next) => {
-  db.any({
+  const { title, article } = req.body;
+  const { articleid } = req.params;
+  db.one({
     text:
-      "UPDATE article SET (title, article) VALUES($(title), $(article)) WHERE articleId = $id",
-    values: [req.body.title, req.body.article, req.params.articleId]
+      "UPDATE article SET title = $1, article = $2 WHERE articleid = $3 RETURNING title, article",
+    values: [title, article, articleid]
   })
     .then(value => {
       res.status(201).json({
