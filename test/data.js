@@ -34,3 +34,9 @@ exports.testGif = {
   image: "image_Gif",
   date: moment()
 };
+
+exports.testArticle = {
+  title: "A day in development training",
+  article:
+    "As always, a day starts up with waking from sleep (already sweating) and wondering how to go about fixing the bug I left before falling asleep at the keys (again!!!)"
+};

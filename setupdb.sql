@@ -19,3 +19,12 @@ CREATE TABLE gif (
 	"comment" varchar(7000) DEFAULT 'varchar'::character varying,
 	PRIMARY KEY (gifid)
 );
+
+CREATE TABLE article (
+	title varchar(400) DEFAULT 'varchar'::character varying NOT NULL,
+	article varchar(10485760) DEFAULT 'varchar'::character varying NOT NULL,
+	date_created timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
+	"comment" varchar(7000) DEFAULT 'varchar'::character varying,
+	articleid serial NOT NULL,
+	PRIMARY KEY (articleid)
+);

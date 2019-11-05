@@ -123,18 +123,19 @@ const createGif = (req, res, next) => {
 
 // SQL query for POST /articles
 const createArticle = (req, res, next) => {
-  db.any({
+  const { title, article } = req.body;
+  db.one({
     text:
-      "INSERT INTO article(title, article) VALUES($(title), $(article)) RETURNING articleId",
-    values: [req.body.title, req.body.article]
+      "INSERT INTO article(title, article) VALUES($1, $2) RETURNING title, date_created, articleId",
+    values: [title, article]
   })
     .then(value => {
       res.status(201).json({
         status: "success",
         data: {
           message: "Article successfully posted",
-          articleId: value.articleId,
-          createdOn: value.date,
+          articleId: value.articleid,
+          createdOn: value.date_created,
           title: value.title
         }
       });

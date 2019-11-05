@@ -10,17 +10,7 @@ const router = express.Router();
 router.post("/gifs", routeAuth.auth, teamworkQuery.createGif);
 
 // employees can post articles
-router.post("/articles", (req, res, next) => {
-  res.status(201).json({
-    status: "success",
-    data: {
-      message: "Article successfully posted",
-      articleId: 1,
-      createdOn: moment().format("MMMM Do YYYY, h:mm:ss a"),
-      title: ""
-    }
-  });
-});
+router.post("/articles", routeAuth.auth, teamworkQuery.createArticle);
 
 // employees can comment on other colleagues' article post
 router.post("/articles/:articleId/comment", (req, res, next) => {
