@@ -130,7 +130,6 @@ const createArticle = (req, res, next) => {
     values: [title, article]
   })
     .then(value => {
-      console.log(value);
       res.status(201).json({
         status: "success",
         data: {
