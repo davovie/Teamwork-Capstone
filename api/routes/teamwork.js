@@ -43,14 +43,7 @@ router.post("/gifs/:gifid/comment", (req, res, next) => {
 router.patch("/articles/:articleid", routeAuth.auth, teamworkQuery.editArticle);
 
 // employees can delete their articles
-router.delete("/articles/:articleId", (req, res, next) => {
-  res.status(200).json({
-    status: "success",
-    data: {
-      message: "Article successfully deleted"
-    }
-  });
-});
+router.delete("/articles/:articleId", routeAuth.auth, teamworkQuery.deleteArticle);
 
 // employees can delete their gifs
 router.delete("/gifs/:gifId", (req, res, next) => {

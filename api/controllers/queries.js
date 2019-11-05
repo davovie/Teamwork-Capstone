@@ -173,11 +173,11 @@ const editArticle = (req, res, next) => {
 // SQL query for DELETE /articles/<:articleId>
 const deleteArticle = (req, res, next) => {
   db.none({
-    text: "DELETE FROM article WHERE articleId = $id",
+    text: "DELETE FROM article WHERE articleId = $1",
     values: [req.params.articleId]
   })
     .then(() => {
-      res.status(201).json({
+      res.status(200).json({
         status: "success",
         data: {
           message: "Article successfully deleted"
