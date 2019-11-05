@@ -13,7 +13,7 @@ router.post("/gifs", routeAuth.auth, teamworkQuery.createGif);
 router.post("/articles", routeAuth.auth, teamworkQuery.createArticle);
 
 // employees can comment on other colleagues' article post
-router.post("/articles/:articleId/comment", (req, res, next) => {
+router.post("/articles/:articleid/comment", (req, res, next) => {
   res.status(201).json({
     status: "success",
     data: {
@@ -27,7 +27,7 @@ router.post("/articles/:articleId/comment", (req, res, next) => {
 });
 
 // employees can comment on other colleagues' gif post
-router.post("/gifs/:gifId/comment", (req, res, next) => {
+router.post("/gifs/:gifid/comment", (req, res, next) => {
   res.status(201).json({
     status: "success",
     data: {
@@ -40,16 +40,7 @@ router.post("/gifs/:gifId/comment", (req, res, next) => {
 });
 
 // employees can edit their articles
-router.patch("/articles/:articleId", (req, res, next) => {
-  res.status(200).json({
-    status: "success",
-    data: {
-      message: "Article successfully updated",
-      title: "",
-      article: ""
-    }
-  });
-});
+router.patch("/articles/:articleid", routeAuth.auth, teamworkQuery.editArticle);
 
 // employees can delete their articles
 router.delete("/articles/:articleId", (req, res, next) => {
