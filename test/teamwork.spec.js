@@ -311,7 +311,7 @@ describe("Teamwork App", () => {
   });
 
   // Employees can comment on other colleagues' article post
-  describe.only("POST /articles/<articleid>/comment", () => {
+  describe("POST /articles/<articleid>/comment", () => {
     let articleid;
     before(done => {
       db.none("TRUNCATE TABLE comment");
@@ -324,7 +324,7 @@ describe("Teamwork App", () => {
         done();
       });
     });
-    it("returns json object containing comment and status success", done => {
+    it("respond with status code 201 and returns json object containing comment", done => {
       request(app)
         .post(`/api/v1/articles/${articleid}/comment`)
         .set("authorization", userToken)
