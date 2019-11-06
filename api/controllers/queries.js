@@ -192,14 +192,14 @@ const deleteArticle = (req, res, next) => {
 // SQL query for DELETE /gifs/<:gifId>
 const deleteGif = (req, res, next) => {
   db.none({
-    text: "DELETE FROM Gif WHERE gifId = $id",
-    values: [req.params.gifId]
+    text: "DELETE FROM gif WHERE gifid = $1",
+    values: [req.params.gifid]
   })
     .then(() => {
-      res.status(201).json({
+      res.status(200).json({
         status: "success",
         data: {
-          message: "Article successfully deleted"
+          message: "gif post successfully deleted"
         }
       });
     })

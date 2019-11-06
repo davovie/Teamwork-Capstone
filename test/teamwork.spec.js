@@ -203,7 +203,7 @@ describe("Teamwork App", () => {
   });
 
   // employees can edit their article
-  describe("PATCH /articles/<articleId>", () => {
+  describe("PATCH /articles/<articleid>", () => {
     let articleid;
     before(done => {
       db.one(
@@ -240,7 +240,7 @@ describe("Teamwork App", () => {
   });
 
   // employees can delete their articles
-  describe("DELETE /articles/<articleId>", () => {
+  describe("DELETE /articles/<articleid>", () => {
     let articleid;
     before(done => {
       db.one(
@@ -274,11 +274,23 @@ describe("Teamwork App", () => {
   });
 
   // employees can delete their gif
-  describe("DELETE /gifs/<gifId>", () => {
+  describe("DELETE /gifs/<gifid>", () => {
+    let gifid;
+    before(done => {
+      db.none("TRUNCATE TABLE gif");
+      db.one(
+        // Insert default Article into table article
+        "INSERT INTO gif (title, image_url, date_created) VALUES ($1, $2, $3) RETURNING gifid",
+        [usr.testGif.title, usr.testGif.image, usr.testGif.date]
+      ).then(val => {
+        gifid = val.gifid;
+        done();
+      });
+    });
     it("responds with status code 200 and returns json object", done => {
       request(app)
-        .delete("/api/v1/gifs/:gifId")
-        .set("header", "application/json")
+        .delete(`/api/v1/gifs/${gifid}`)
+        .set("authorization", userToken)
         .expect("Content-Type", /json/)
         .end((err, res) => {
           if (err) return done(err);
@@ -297,7 +309,7 @@ describe("Teamwork App", () => {
   });
 
   // Employees can comment on other colleagues' article post
-  describe("POST /articles/<:articleId>/comment", () => {
+  describe("POST /articles/<articleid>/comment", () => {
     it("responds with status code 201", done => {
       request(app)
         .post("/api/v1/articles/:articleId/comment")

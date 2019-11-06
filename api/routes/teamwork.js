@@ -43,17 +43,10 @@ router.post("/gifs/:gifid/comment", (req, res, next) => {
 router.patch("/articles/:articleid", routeAuth.auth, teamworkQuery.editArticle);
 
 // employees can delete their articles
-router.delete("/articles/:articleId", routeAuth.auth, teamworkQuery.deleteArticle);
+router.delete("/articles/:articleid", routeAuth.auth, teamworkQuery.deleteArticle);
 
 // employees can delete their gifs
-router.delete("/gifs/:gifId", (req, res, next) => {
-  res.status(200).json({
-    status: "success",
-    data: {
-      message: "gif post successfully deleted"
-    }
-  });
-});
+router.delete("/gifs/:gifid", routeAuth.auth, teamworkQuery.deleteGif);
 
 router.get("/", (req, res) => {
   res.json({ message: "Server starts successfully!" });
