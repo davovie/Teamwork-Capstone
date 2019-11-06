@@ -39,10 +39,11 @@ ALTER TABLE article
 
 CREATE TABLE comment (
 	commentid serial NOT NULL,
-	"comment" varchar(1003000) DEFAULT 'varchar'::character varying,
+	"comment" varchar(103000) DEFAULT 'varchar'::character varying,
 	authorid bigint,
 	articleid bigint,
 	gifid bigint,
+	date_created timestamp DEFAULT CURRENT_TIMESTAMP NOT NULL,
 	PRIMARY KEY (commentid)
 );
 
