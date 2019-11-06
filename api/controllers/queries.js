@@ -99,11 +99,11 @@ const signin = (req, res, next) => {
 
 // SQL query to POST /gifs
 const createGif = (req, res, next) => {
-  const { title, image, date, comment } = req.body;
+  const { title, image, date } = req.body;
   db.one({
     text:
-      "INSERT INTO gif (title, image_url, date_created, comment) VALUES($1, $2, $3, $4) RETURNING gifid, title, image_url, date_created",
-    values: [title, image, date, comment]
+      "INSERT INTO gif (title, image_url, date_created, authorid) VALUES($1, $2, $3, $4) RETURNING gifid, title, image_url, date_created",
+    values: [title, image, date, req.auth]
   })
     .then(value => {
       res.status(200).json({
@@ -127,8 +127,8 @@ const createArticle = (req, res, next) => {
   const { title, article } = req.body;
   db.one({
     text:
-      "INSERT INTO article(title, article) VALUES($1, $2) RETURNING title, date_created, articleId",
-    values: [title, article]
+      "INSERT INTO article(title, article, authorid) VALUES($1, $2, $3) RETURNING title, date_created, articleId",
+    values: [title, article, req.auth]
   })
     .then(value => {
       res.status(201).json({
@@ -150,10 +150,11 @@ const createArticle = (req, res, next) => {
 const editArticle = (req, res, next) => {
   const { title, article } = req.body;
   const { articleid } = req.params;
+  const authorid = req.auth;
   db.one({
     text:
-      "UPDATE article SET title = $1, article = $2 WHERE articleid = $3 RETURNING title, article",
-    values: [title, article, articleid]
+      "UPDATE article SET title = $1, article = $2, authorid = $3 WHERE articleid = $4 RETURNING title, article",
+    values: [title, article, authorid, articleid]
   })
     .then(value => {
       res.status(201).json({

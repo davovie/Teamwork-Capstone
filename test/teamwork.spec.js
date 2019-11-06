@@ -11,8 +11,8 @@ describe("Teamwork App", () => {
   let userToken;
   before(done => {
     // clear table employee of all data
-    db.none("TRUNCATE TABLE employee").then(() => {
-      db.none("TRUNCATE TABLE article").then(() => {
+    db.none("TRUNCATE TABLE article CASCADE").then(() => {
+      db.none("TRUNCATE TABLE employee CASCADE").then(() => {
         db.one(
           // insert in a default user
           `INSERT INTO employee (${Object.keys(usr.defaultUser).join(
@@ -131,7 +131,7 @@ describe("Teamwork App", () => {
   // employees can Post gifs
   describe("POST /gifs", () => {
     before(() => {
-      db.none("TRUNCATE TABLE gif");
+      db.none("TRUNCATE TABLE gif CASCADE");
     });
     // it("successfully uploads gif to cloudinary", function(done) {
     //   request(app)
@@ -277,7 +277,7 @@ describe("Teamwork App", () => {
   describe("DELETE /gifs/<gifid>", () => {
     let gifid;
     before(done => {
-      db.none("TRUNCATE TABLE gif");
+      db.none("TRUNCATE TABLE gif CASCADE");
       db.one(
         // Insert default Article into table article
         "INSERT INTO gif (title, image_url, date_created) VALUES ($1, $2, $3) RETURNING gifid",
