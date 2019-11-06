@@ -46,3 +46,7 @@ exports.editedArticle = {
   article:
     "As it always begins, the day starts up with thought of code (already sweating) and wondering how to fix a bug, improve a feature on code snippet left before falling asleep at the keys (sigh!!!)"
 };
+
+exports.comment1 = {
+  comment: "Well developed comment. Love your natural tone. Sooooo relaxed"
+};

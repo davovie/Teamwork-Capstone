@@ -9,10 +9,11 @@ const usr = require("./data");
 
 describe("Teamwork App", () => {
   let userToken;
+  let employeeid;
   before(done => {
     // clear table employee of all data
-    db.none("TRUNCATE TABLE employee").then(() => {
-      db.none("TRUNCATE TABLE article").then(() => {
+    db.none("TRUNCATE TABLE article CASCADE").then(() => {
+      db.none("TRUNCATE TABLE employee CASCADE").then(() => {
         db.one(
           // insert in a default user
           `INSERT INTO employee (${Object.keys(usr.defaultUser).join(
@@ -21,6 +22,7 @@ describe("Teamwork App", () => {
           Object.values(usr.defaultUser)
         ).then(val => {
           // generate token for default user
+          employeeid = val.employeeid;
           userToken = jwt.sign(
             { userid: val.employeeid },
             "RANDOM_TOKEN_SECRET",
@@ -131,7 +133,7 @@ describe("Teamwork App", () => {
   // employees can Post gifs
   describe("POST /gifs", () => {
     before(() => {
-      db.none("TRUNCATE TABLE gif");
+      db.none("TRUNCATE TABLE gif CASCADE");
     });
     // it("successfully uploads gif to cloudinary", function(done) {
     //   request(app)
@@ -277,7 +279,7 @@ describe("Teamwork App", () => {
   describe("DELETE /gifs/<gifid>", () => {
     let gifid;
     before(done => {
-      db.none("TRUNCATE TABLE gif");
+      db.none("TRUNCATE TABLE gif CASCADE");
       db.one(
         // Insert default Article into table article
         "INSERT INTO gif (title, image_url, date_created) VALUES ($1, $2, $3) RETURNING gifid",
@@ -310,20 +312,23 @@ describe("Teamwork App", () => {
 
   // Employees can comment on other colleagues' article post
   describe("POST /articles/<articleid>/comment", () => {
-    it("responds with status code 201", done => {
-      request(app)
-        .post("/api/v1/articles/:articleId/comment")
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res.status).to.equal(201);
-          done();
-        });
+    let articleid;
+    before(done => {
+      db.none("TRUNCATE TABLE comment");
+      db.one(
+        // Insert default Article into table article
+        "INSERT INTO article (title, article, authorid) VALUES ($1, $2, $3) RETURNING articleid",
+        [usr.defaultArticle.title, usr.defaultArticle.article, employeeid]
+      ).then(val => {
+        articleid = val.articleid;
+        done();
+      });
     });
-    it("returns json object containing comment and status success", done => {
+    it("respond with status code 201 and returns json object containing comment", done => {
       request(app)
-        .post("/api/v1/articles/:articleId/comment")
-        .set("header", "application/json")
-        .send({ comment: "string" })
+        .post(`/api/v1/articles/${articleid}/comment`)
+        .set("authorization", userToken)
+        .send(usr.comment1)
         .expect("Content-Type", /json/)
         .end((err, res) => {
           if (err) return done(err);
@@ -333,6 +338,7 @@ describe("Teamwork App", () => {
               data: { message, createdOn, articleTitle, article, comment }
             }
           } = res;
+          expect(res.status).to.equal(201);
           expect(status).to.equal("success");
           expect(message).to.be.equal("Comment successfully created");
           expect(createdOn).to.be.a("string");

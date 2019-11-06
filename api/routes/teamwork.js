@@ -13,18 +13,7 @@ router.post("/gifs", routeAuth.auth, teamworkQuery.createGif);
 router.post("/articles", routeAuth.auth, teamworkQuery.createArticle);
 
 // employees can comment on other colleagues' article post
-router.post("/articles/:articleid/comment", (req, res, next) => {
-  res.status(201).json({
-    status: "success",
-    data: {
-      message: "Comment successfully created",
-      createdOn: moment().format("MMMM Do YYYY, h:mm:ss a"),
-      articleTitle: "",
-      article: "",
-      comment: ""
-    }
-  });
-});
+router.post("/articles/:articleid/comment", routeAuth.auth, teamworkQuery.commentArticle);
 
 // employees can comment on other colleagues' gif post
 router.post("/gifs/:gifid/comment", (req, res, next) => {

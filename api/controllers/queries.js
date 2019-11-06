@@ -99,11 +99,11 @@ const signin = (req, res, next) => {
 
 // SQL query to POST /gifs
 const createGif = (req, res, next) => {
-  const { title, image, date, comment } = req.body;
+  const { title, image, date } = req.body;
   db.one({
     text:
-      "INSERT INTO gif (title, image_url, date_created, comment) VALUES($1, $2, $3, $4) RETURNING gifid, title, image_url, date_created",
-    values: [title, image, date, comment]
+      "INSERT INTO gif (title, image_url, date_created, authorid) VALUES($1, $2, $3, $4) RETURNING gifid, title, image_url, date_created",
+    values: [title, image, date, req.auth]
   })
     .then(value => {
       res.status(200).json({
@@ -127,8 +127,8 @@ const createArticle = (req, res, next) => {
   const { title, article } = req.body;
   db.one({
     text:
-      "INSERT INTO article(title, article) VALUES($1, $2) RETURNING title, date_created, articleId",
-    values: [title, article]
+      "INSERT INTO article(title, article, authorid) VALUES($1, $2, $3) RETURNING title, date_created, articleId",
+    values: [title, article, req.auth]
   })
     .then(value => {
       res.status(201).json({
@@ -150,10 +150,11 @@ const createArticle = (req, res, next) => {
 const editArticle = (req, res, next) => {
   const { title, article } = req.body;
   const { articleid } = req.params;
+  const authorid = req.auth;
   db.one({
     text:
-      "UPDATE article SET title = $1, article = $2 WHERE articleid = $3 RETURNING title, article",
-    values: [title, article, articleid]
+      "UPDATE article SET title = $1, article = $2, authorid = $3 WHERE articleid = $4 RETURNING title, article",
+    values: [title, article, authorid, articleid]
   })
     .then(value => {
       res.status(201).json({
@@ -210,20 +211,29 @@ const deleteGif = (req, res, next) => {
 
 // SQL query for POST /articles/<articleId>/comment
 const commentArticle = (req, res, next) => {
-  db.any({
-    text: "INSERT INTO article (comment) VALUES($(comment)) WHERE id = $1", // can also be a QueryFile object
-    values: [req.body.comment, req.params.articleId]
+  const { comment } = req.body;
+  const authorid = req.auth;
+  const { articleid } = req.params;
+  db.one({
+    text:
+      "INSERT INTO comment (comment, authorid, articleid) VALUES ($1, $2, $3) RETURNING comment, date_created",
+    values: [comment, authorid, articleid]
   })
-    .then(value => {
-      res.status(201).json({
-        status: "success",
-        data: {
-          message: "Comment successfully created",
-          createdOn: value.date,
-          title: value.title,
-          article: value.article,
-          comment: value.comment
-        }
+    .then(returnedComment => {
+      db.one({
+        text: "SELECT title, article, date_created FROM article WHERE articleid = $1",
+        values: [articleid]
+      }).then(value => {
+        res.status(201).json({
+          status: "success",
+          data: {
+            message: "Comment successfully created",
+            createdOn: returnedComment.date_created,
+            articleTitle: value.title,
+            article: value.article,
+            comment: returnedComment.comment
+          }
+        });
       });
     })
     .catch(err => {
