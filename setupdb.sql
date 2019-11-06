@@ -28,3 +28,24 @@ CREATE TABLE article (
 	articleid serial NOT NULL,
 	PRIMARY KEY (articleid)
 );
+
+CREATE TABLE comment (
+	commentid serial NOT NULL,
+	"comment" varchar(1003000) DEFAULT 'varchar'::character varying,
+	authorid bigint,
+	articleid bigint,
+	gifid bigint,
+	PRIMARY KEY (commentid)
+);
+
+ALTER TABLE comment
+	ADD FOREIGN KEY (authorid) 
+	REFERENCES employee (employeeid);
+
+ALTER TABLE comment
+	ADD FOREIGN KEY (articleid) 
+	REFERENCES article (articleid);
+
+ALTER TABLE comment
+	ADD FOREIGN KEY (gifid) 
+	REFERENCES gif (gifid);
