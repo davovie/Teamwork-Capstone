@@ -211,20 +211,29 @@ const deleteGif = (req, res, next) => {
 
 // SQL query for POST /articles/<articleId>/comment
 const commentArticle = (req, res, next) => {
-  db.any({
-    text: "INSERT INTO article (comment) VALUES($(comment)) WHERE id = $1", // can also be a QueryFile object
-    values: [req.body.comment, req.params.articleId]
+  const { comment } = req.body;
+  const authorid = req.auth;
+  const { articleid } = req.params;
+  db.one({
+    text:
+      "INSERT INTO comment (comment, authorid, articleid) VALUES ($1, $2, $3) RETURNING comment, date_created",
+    values: [comment, authorid, articleid]
   })
-    .then(value => {
-      res.status(201).json({
-        status: "success",
-        data: {
-          message: "Comment successfully created",
-          createdOn: value.date,
-          title: value.title,
-          article: value.article,
-          comment: value.comment
-        }
+    .then(returnedComment => {
+      db.one({
+        text: "SELECT title, article, date_created FROM article WHERE articleid = $1",
+        values: [articleid]
+      }).then(value => {
+        res.status(201).json({
+          status: "success",
+          data: {
+            message: "Comment successfully created",
+            createdOn: returnedComment.date_created,
+            articleTitle: value.title,
+            article: value.article,
+            comment: returnedComment.comment
+          }
+        });
       });
     })
     .catch(err => {
