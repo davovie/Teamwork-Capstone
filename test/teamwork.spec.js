@@ -310,9 +310,22 @@ describe("Teamwork App", () => {
 
   // Employees can comment on other colleagues' article post
   describe("POST /articles/<articleid>/comment", () => {
+    let articleid;
+    before(done => {
+      db.none("TRUNCATE TABLE comment");
+      db.one(
+        // Insert default Article into table article
+        "INSERT INTO article (title, article) VALUES ($1, $2) RETURNING articleid",
+        [usr.defaultArticle.title, usr.defaultArticle.article]
+      ).then(val => {
+        articleid = val.articleid;
+        done();
+      });
+    });
     it("responds with status code 201", done => {
       request(app)
-        .post("/api/v1/articles/:articleId/comment")
+        .set("authorization", userToken)
+        .post(`/api/v1/articles/${articleid}/comment`)
         .end((err, res) => {
           if (err) return done(err);
           expect(res.status).to.equal(201);
