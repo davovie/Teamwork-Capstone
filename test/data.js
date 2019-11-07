@@ -12,7 +12,7 @@ exports.defaultUser = {
   address: "Ketu, lagos, Nigeria"
 };
 
-exports.testUser = {
+exports.testUser1 = {
   firstName: "John",
   lastName: "Carpenter",
   email: "foo@bar.com",
@@ -21,6 +21,17 @@ exports.testUser = {
   jobRole: "Manager",
   department: "Human Resources",
   address: "Apapa, Lagos, Nigeria"
+};
+
+exports.testUser2 = {
+  firstName: "Arlen",
+  lastName: "Bales",
+  email: "bales@deliverer.com",
+  password: "reche234ed",
+  gender: "Male",
+  jobRole: "Manager",
+  department: "Warehouse",
+  address: "Akenfa 3, Yenagoa, Bayelsa"
 };
 
 exports.userLogin = {
@@ -49,4 +60,8 @@ exports.editedArticle = {
 
 exports.comment1 = {
   comment: "Well developed comment. Love your natural tone. Sooooo relaxed"
+};
+
+exports.comment2 = {
+  comment: "Another well documented image."
 };
