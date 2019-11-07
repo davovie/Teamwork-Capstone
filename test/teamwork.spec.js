@@ -54,7 +54,7 @@ describe("Teamwork App", () => {
     it("respond with status 201 and returns json data containing token", done => {
       request(app)
         .post("/api/v1/auth/create-user")
-        .send(usr.testUser) // Send test user signin credentials
+        .send(usr.testUser2) // Send test user signin credentials
         .expect("Content-Type", /json/)
         .then(res => {
           const {
@@ -79,7 +79,7 @@ describe("Teamwork App", () => {
   describe("POST /auth/signin", () => {
     // Create an Employee account to ensure signin
     before(done => {
-      bcrypt.hash(usr.testUser.password, 10).then(password => {
+      bcrypt.hash(usr.testUser1.password, 10).then(password => {
         const {
           firstName,
           lastName,
@@ -88,7 +88,7 @@ describe("Teamwork App", () => {
           jobRole,
           department,
           address
-        } = usr.testUser; // receive form data for test user
+        } = usr.testUser1; // receive form data for test user
         db.one({
           text:
             "INSERT INTO employee (firstname, lastname, email, password, gender, job_role, department, address) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING email, password, employeeid",
@@ -106,7 +106,6 @@ describe("Teamwork App", () => {
         done();
       });
     });
-
     it("responds with status code 200 and returns json data containing token", done => {
       request(app)
         .post("/api/v1/auth/signin")
@@ -351,21 +350,25 @@ describe("Teamwork App", () => {
   });
 
   // Employees can comment on other colleagues' gif post
-  describe("POST /gifs/<:gifId>/comment", () => {
-    it("responds with status code 201", done => {
-      request(app)
-        .post("/api/v1/gifs/:gifId/comment")
-        .end((err, res) => {
-          if (err) return done(err);
-          expect(res.status).to.equal(201);
+  describe("POST /gifs/<gifid>/comment", () => {
+    let gifid;
+    before(done => {
+      db.none("TRUNCATE TABLE comment").then(() => {
+        db.one(
+          // Insert default Article into table article
+          "INSERT INTO gif (title, image_url, authorid) VALUES ($1, $2, $3) RETURNING gifid",
+          [usr.testGif.title, usr.testGif.image, employeeid]
+        ).then(val => {
+          gifid = val.gifid;
           done();
         });
+      });
     });
-    it("return json object with comment and status success", done => {
+    it("responds with status code 201 and returns json date with comment", done => {
       request(app)
-        .post("/api/v1/gifs/:gifId/comment")
-        .set("header", "application/json")
-        .send({ comment: "string" })
+        .post(`/api/v1/gifs/${gifid}/comment`)
+        .set("authorization", userToken)
+        .send(usr.comment2)
         .expect("Content-Type", /json/)
         .end((err, res) => {
           if (err) return done(err);
@@ -375,6 +378,7 @@ describe("Teamwork App", () => {
               data: { message, createdOn, gifTitle, comment }
             }
           } = res;
+          expect(res.status).to.equal(201);
           expect(status).to.equal("success");
           expect(message).to.be.equal("Comment successfully created");
           expect(createdOn).to.be.a("string");
