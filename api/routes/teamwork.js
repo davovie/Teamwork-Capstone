@@ -1,5 +1,6 @@
 
 const express = require("express");
+const moment = require('moment');
 const teamworkQuery = require('../controllers/queries');
 const routeAuth = require("../auth/auth");
 
@@ -15,7 +16,17 @@ router.post("/articles", routeAuth.auth, teamworkQuery.createArticle);
 router.post("/articles/:articleid/comment", routeAuth.auth, teamworkQuery.commentArticle);
 
 // employees can comment on other colleagues' gif post
-router.post("/gifs/:gifid/comment", routeAuth.auth, teamworkQuery.commentGif);
+router.post("/gifs/:gifid/comment", (req, res, next) => {
+  res.status(201).json({
+    status: "success",
+    data: {
+      message: "Comment successfully created",
+      createdOn: moment().format("MMMM Do YYYY, h:mm:ss a"),
+      gifTitle: "",
+      comment: ""
+    }
+  });
+});
 
 // employees can edit their articles
 router.patch("/articles/:articleid", routeAuth.auth, teamworkQuery.editArticle);

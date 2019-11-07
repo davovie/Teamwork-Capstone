@@ -58,17 +58,17 @@ const createUser = (req, res, next) => {
 const signin = (req, res, next) => {
   const { email, password } = req.body;
   // Retrieve all values from database where email match
-  db.one("SELECT  * FROM employee WHERE email = $(email)", { email })
+  db.any("SELECT  * FROM employee WHERE email = $(email)", { email })
     .then(value => {
       // compare recieved email address with database value
-      if (value.email !== email) {
+      if (value[0].email !== email) {
         return res.status(401).json({
           error: new Error("User not found")
         });
       }
       // Use bcrypt to compare hash of sent password with database password hash
       bcrypt
-        .compare(password, value.password)
+        .compare(password, value[0].password)
         .then(valid => {
           if (!valid) {
             return res.status(401).json({
@@ -76,7 +76,7 @@ const signin = (req, res, next) => {
             });
           }
           const userToken = jwt.sign(
-            { userid: value.employeeid },
+            { userid: value[0].employeeid },
             "RANDOM_TOKEN_SECRET",
             { expiresIn: "1h" }
           );
@@ -84,7 +84,7 @@ const signin = (req, res, next) => {
             status: "success",
             data: {
               token: userToken,
-              userId: value.employeeid
+              userId: value[0].employeeid
             }
           });
         })
@@ -221,8 +221,7 @@ const commentArticle = (req, res, next) => {
   })
     .then(returnedComment => {
       db.one({
-        text:
-          "SELECT title, article FROM article WHERE articleid = $1",
+        text: "SELECT title, article, date_created FROM article WHERE articleid = $1",
         values: [articleid]
       }).then(value => {
         res.status(201).json({
@@ -244,29 +243,20 @@ const commentArticle = (req, res, next) => {
 
 // SQL query for POST /gifs/<:gifId>/comment
 const commentGif = (req, res, next) => {
-  const { comment } = req.body;
-  const authorid = req.auth;
-  const { gifid } = req.params;
-  db.one({
-    text:
-      "INSERT INTO comment (comment, authorid, gifid) VALUES($1, $2, $3) RETURNING comment, date_created",
-    values: [comment, authorid, gifid]
+  db.any({
+    text: "INSERT INTO Gif (comment) VALUES($(comment)) WHERE id = $1", // can also be a QueryFile object
+    values: [req.body.comment, req.params.gifId]
   })
-    .then(gifComment => {
-      db.one({
-        text:
-          "SELECT title FROM gif WHERE gifid = $1",
-        values: [gifid]
-      }).then(value => {
-        res.status(201).json({
-          status: "success",
-          data: {
-            message: "Comment successfully created",
-            createdOn: gifComment.date_created,
-            gifTitle: value.title,
-            comment: gifComment.comment
-          }
-        });
+    .then(value => {
+      res.status(201).json({
+        status: "success",
+        data: {
+          message: "Comment successfully created",
+          createdOn: value.date,
+          title: value.title,
+          article: value.article,
+          comment: value.comment
+        }
       });
     })
     .catch(err => {
