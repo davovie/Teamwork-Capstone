@@ -6,7 +6,8 @@
   "scripts": {
     "test": "nyc mocha",
     "coverage": "nyc report --reporter=text-lcov | coveralls",
-    "start": "nodemon server.js"
+    "start:dev": "nodemon server.js",
+    "start": "node server.js"
   },
   "repository": {
     "type": "git",
