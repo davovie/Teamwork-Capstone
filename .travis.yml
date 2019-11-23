@@ -1,0 +1,15 @@
+
+language: node_js
+node_js: 
+  - "stable"
+cache:
+  directories:
+    - "node_modules"
+    - "test"
+after_success: npm run coverage
+before_script:
+  psql -U postgres -c 'create database travis_ci_test;' &&
+  psql -U postgres -d travis_ci_test -a -f setupdb.sql
+  
+services:
+  - postgresql
