@@ -17,7 +17,8 @@
     "Teamwork",
     "social",
     "app",
-    "network"
+    "network",
+    "Heroku"
   ],
   "author": "Ozi Oviezibe David",
   "license": "ISC",
@@ -46,5 +47,8 @@
     "mocha": "^6.2.2",
     "nyc": "^14.1.1",
     "supertest": "^4.0.2"
+  },
+  "engines": {
+    "node": "12.x"
   }
 }
